@@ -47,7 +47,7 @@ export default function LoginPage() {
             <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)}
               required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9B1C2E]" />
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
           <button type="submit" disabled={loading}
             className="w-full py-2 px-4 rounded-lg text-white font-medium text-sm bg-[#9B1C2E] disabled:opacity-50">
             {loading ? 'Wird eingeloggt...' : 'Einloggen'}
