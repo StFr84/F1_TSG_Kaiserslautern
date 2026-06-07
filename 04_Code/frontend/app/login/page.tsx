@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -30,9 +31,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3 bg-[#9B1C2E]">
-            <span className="text-white font-bold text-xl">TSG</span>
-          </div>
+          <Image src="/logo.png" alt="TSG 1861 Kaiserslautern" width={120} height={60} className="mb-4" priority />
           <h1 className="text-2xl font-bold text-gray-900">TSG Connect</h1>
           <p className="text-sm text-gray-500 mt-1">F1-Jugend · TSG 1861 Kaiserslautern</p>
         </div>

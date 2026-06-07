@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Trophy, Dumbbell, Calendar, ChevronRight, AlertCircle } from 'lucide-react'
 import { formatEventDate, formatEventTime } from '@/lib/format'
 
@@ -40,10 +41,17 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="px-4 pt-10 pb-5 bg-[#9B1C2E]">
-        <p className="text-white/70 text-sm">Willkommen</p>
-        <h1 className="text-white text-xl font-bold">{profile?.full_name}</h1>
-        <p className="text-white/60 text-xs mt-0.5">F1 · TSG 1861 Kaiserslautern</p>
+      <div className="px-4 pt-8 pb-5 bg-[#9B1C2E]">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-white/70 text-sm">Willkommen</p>
+            <h1 className="text-white text-xl font-bold">{profile?.full_name}</h1>
+            <p className="text-white/60 text-xs mt-0.5">F1 · TSG 1861 Kaiserslautern</p>
+          </div>
+          <div className="bg-white rounded-lg p-1.5">
+            <Image src="/logo.png" alt="TSG 1861 Kaiserslautern" width={72} height={36} />
+          </div>
+        </div>
       </div>
 
       <div className="px-4 py-5 space-y-4">
