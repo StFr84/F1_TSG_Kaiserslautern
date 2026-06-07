@@ -18,7 +18,7 @@ export default async function SpielerPage() {
     .from('players').select('*').eq('team_id', TEAM_ID).order('first_name')
 
   const { data: parents } = await supabase
-    .from('profiles').select('id, full_name').eq('role', 'parent').order('full_name')
+    .from('profiles').select('id, full_name, role').order('full_name')
 
   return (
     <div className="px-4 py-6">
@@ -54,7 +54,9 @@ export default async function SpielerPage() {
                   className="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white text-gray-700">
                   <option value="">Kein Elternteil</option>
                   {parents?.map(p => (
-                    <option key={p.id} value={p.id}>{p.full_name}</option>
+                    <option key={p.id} value={p.id}>
+                      {p.full_name}{p.role === 'trainer' ? ' (Trainer)' : ''}
+                    </option>
                   ))}
                 </select>
                 <button type="submit"
