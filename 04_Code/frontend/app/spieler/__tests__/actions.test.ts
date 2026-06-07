@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validatePlayer } from '../actions'
+import { validatePlayer } from '../validate'
 
 describe('validatePlayer', () => {
   it('akzeptiert gültige Daten', () => {

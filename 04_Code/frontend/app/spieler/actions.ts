@@ -2,17 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { validatePlayer } from './validate'
 
 const TEAM_ID = '00000000-0000-0000-0000-000000000001'
-
-export function validatePlayer(data: { first_name: string; birth_year: number }): boolean {
-  const currentYear = new Date().getFullYear()
-  return (
-    data.first_name.trim().length > 0 &&
-    data.birth_year >= 1990 &&
-    data.birth_year <= currentYear
-  )
-}
 
 export async function addPlayer(formData: FormData) {
   const first_name = formData.get('first_name') as string
