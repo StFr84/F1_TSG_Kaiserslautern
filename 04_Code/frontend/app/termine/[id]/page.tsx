@@ -15,12 +15,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
 
-  const playerQuery = supabase.from('players').select('*')
-  if (profile?.role === 'parent') {
-    playerQuery.eq('parent_id', user.id)
-  } else {
-    playerQuery.eq('team_id', event.team_id)
-  }
+  const playerQuery = profile?.role === 'parent'
+    ? supabase.from('players').select('*').eq('parent_id', user.id)
+    : supabase.from('players').select('*').eq('team_id', event.team_id)
   const { data: players } = await playerQuery.order('first_name')
 
   const { data: rsvps } = await supabase.from('rsvps').select('*')

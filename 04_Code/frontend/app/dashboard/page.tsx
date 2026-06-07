@@ -18,9 +18,9 @@ export default async function DashboardPage() {
     .from('events').select('*').eq('team_id', TEAM_ID)
     .gte('starts_at', new Date().toISOString()).order('starts_at').limit(3)
 
-  const playerQuery = supabase.from('players').select('*')
-  if (profile?.role === 'parent') playerQuery.eq('parent_id', user.id)
-  else playerQuery.eq('team_id', TEAM_ID)
+  const playerQuery = profile?.role === 'parent'
+    ? supabase.from('players').select('*').eq('parent_id', user.id)
+    : supabase.from('players').select('*').eq('team_id', TEAM_ID)
   const { data: players } = await playerQuery
 
   const gameEvents = nextEvents?.filter(e => e.type === 'game') || []
