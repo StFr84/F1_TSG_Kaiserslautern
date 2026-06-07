@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon-512.png" />
       </head>
       <body className="bg-white max-w-md mx-auto">
-        <main className="pb-20">{children}</main>
+        <main style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))' }}>{children}</main>
         <BottomNav />
       </body>
     </html>
