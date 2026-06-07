@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
+import { Pencil, Trash2 } from 'lucide-react'
 import { formatEventDate, formatEventTime } from '@/lib/format'
 import { getDefaultRSVP, isDeadlinePassed } from '@/lib/rsvp'
 import RSVPButtons from './RSVPButtons'
+import { deleteEvent } from './actions'
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -29,7 +32,23 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="px-4 py-6">
-      <h1 className="text-xl font-bold text-gray-900 mb-1">{event.title}</h1>
+      <div className="flex items-start justify-between mb-1">
+        <h1 className="text-xl font-bold text-gray-900">{event.title}</h1>
+        {profile?.role === 'trainer' && (
+          <div className="flex gap-2 ml-3 flex-shrink-0">
+            <Link href={`/termine/${id}/bearbeiten`}
+              className="p-2 rounded-lg bg-gray-100 text-gray-600">
+              <Pencil size={16} />
+            </Link>
+            <form action={deleteEvent.bind(null, id)}>
+              <button type="submit" className="p-2 rounded-lg bg-red-50 text-red-500"
+                onClick={e => { if (!confirm('Termin wirklich löschen?')) e.preventDefault() }}>
+                <Trash2 size={16} />
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
       <p className="text-sm text-gray-500 mb-1">{formatEventDate(event.starts_at)} · {formatEventTime(event.starts_at)}</p>
       {event.location && <p className="text-sm text-gray-500 mb-2">{event.location}</p>}
       {event.type === 'game' && event.opponent && (
