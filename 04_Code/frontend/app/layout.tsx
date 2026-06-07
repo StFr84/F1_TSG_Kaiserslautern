@@ -13,6 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="de">
       <head>
         <meta name="theme-color" content="#9B1C2E" />
+        <link rel="apple-touch-icon" href="/icon-512.png" />
       </head>
       <body className="bg-white max-w-md mx-auto">
         <main className="pb-20">{children}</main>
