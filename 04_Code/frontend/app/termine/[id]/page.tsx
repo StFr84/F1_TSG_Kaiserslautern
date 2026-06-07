@@ -1,11 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { formatEventDate, formatEventTime } from '@/lib/format'
 import { getDefaultRSVP, isDeadlinePassed } from '@/lib/rsvp'
 import RSVPButtons from './RSVPButtons'
-import { deleteEvent } from './actions'
+import DeleteEventButton from './DeleteEventButton'
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -40,12 +40,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               className="p-2 rounded-lg bg-gray-100 text-gray-600">
               <Pencil size={16} />
             </Link>
-            <form action={deleteEvent.bind(null, id)}>
-              <button type="submit" className="p-2 rounded-lg bg-red-50 text-red-500"
-                onClick={e => { if (!confirm('Termin wirklich löschen?')) e.preventDefault() }}>
-                <Trash2 size={16} />
-              </button>
-            </form>
+            <DeleteEventButton eventId={id} />
           </div>
         )}
       </div>
