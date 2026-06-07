@@ -19,12 +19,14 @@ export default async function SpielerPage() {
   return (
     <div className="px-4 py-6">
       <h1 className="text-xl font-bold text-gray-900 mb-6">Spieler</h1>
-      <form action={addPlayer} className="flex gap-2 mb-6">
+      <form action={addPlayer} className="mb-6 space-y-2">
         <input name="first_name" placeholder="Vorname" required
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-        <input name="birth_year" type="number" placeholder="Jg." min={1990} max={new Date().getFullYear()} required
-          className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-        <button type="submit" className="px-4 py-2 rounded-lg text-white text-sm font-medium bg-[#9B1C2E]">+</button>
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm" />
+        <div className="flex gap-2">
+          <input name="birth_year" type="number" placeholder="Jahrgang (z.B. 2014)" min={1990} max={new Date().getFullYear()} required
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm" />
+          <button type="submit" className="px-5 py-2.5 rounded-lg text-white text-sm font-medium bg-[#9B1C2E]">+</button>
+        </div>
       </form>
       <ul className="space-y-2">
         {players?.map(player => (
