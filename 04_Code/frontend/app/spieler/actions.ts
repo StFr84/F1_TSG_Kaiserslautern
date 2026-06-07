@@ -26,3 +26,11 @@ export async function deletePlayer(playerId: string) {
   if (error) throw new Error(error.message)
   revalidatePath('/spieler')
 }
+
+export async function assignParent(playerId: string, formData: FormData) {
+  const parent_id = (formData.get('parent_id') as string) || null
+  const supabase = await createClient()
+  const { error } = await supabase.from('players').update({ parent_id }).eq('id', playerId)
+  if (error) throw new Error(error.message)
+  revalidatePath('/spieler')
+}
