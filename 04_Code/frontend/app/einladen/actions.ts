@@ -17,9 +17,11 @@ export async function inviteParent(prevState: State, formData: FormData): Promis
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'trainer') return { error: 'Keine Berechtigung', success: false }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${process.env.VERCEL_URL}`
   const admin = createAdminClient()
   const { error } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name, role: 'parent' },
+    redirectTo: `${siteUrl}/auth/callback`,
   })
   if (error) return { error: error.message, success: false }
 
