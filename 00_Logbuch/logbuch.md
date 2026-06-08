@@ -19,7 +19,7 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - Logo: Genehmigung bei TSG Kaiserslautern Vorstand einholen
 
 ### Offene Punkte
-- [ ] Logo-Genehmigung TSG Kaiserslautern (Vorstand kontaktieren)
+- [x] Logo-Genehmigung TSG Kaiserslautern (Vorstand kontaktieren) — **erteilt am 07.06.2026**
 - [ ] Design-Token von https://tsg1861kl.de/abteilungen/fussball/ extrahieren (UI/UX Agent, Session 2)
 - [ ] Tech-Stack Entscheidung (Architect Agent)
 - [ ] Wireframes erstellen (UI/UX Agent)
@@ -43,7 +43,7 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - **Startscreen:** Dashboard (nächster Termin + offene Aktionen + Ankündigung)
 - **Navigation:** Bottom Nav (Home · Termine · Nachrichten · Profil)
 - **Design-Token:** Primärfarbe `#9B1C2E`, System-UI Font, Border-Radius 8px
-- **Logo:** Genehmigung beim TSG Vorstand ausstehend
+- **Logo:** Genehmigung erteilt (07.06.2026)
 
 ### Ergebnisse
 - Designsystem dokumentiert: `03_Design/designsystem.md`
@@ -51,8 +51,37 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - Wireframes erstellt: Login-Screen + Dashboard Startscreen
 
 ### Offene Punkte
-- [ ] Logo-Genehmigung einholen (Vorstand TSG)
-- [ ] Backlog priorisieren → MVP-Scope definieren
-- [ ] Implementierung Session 3
+- [x] Logo-Genehmigung erteilt (07.06.2026)
+- [x] MVP implementiert (Session 3)
+- [ ] Logo-Datei in App einbauen
+
+---
+
+## SESSION 4 – Deployment & CI/CD
+**Datum:** 08.06.2026  
+**Teilnehmer:** Steven, Claude
+
+### Entscheidungen
+- **Deployment-Plattform:** Vercel (war bereits gesetzt, jetzt sauber verbunden)
+- **CI/CD:** GitHub Actions – automatisches Deploy bei jedem Push auf `main`
+- **GitHub Pages:** deaktiviert (war für alte HTML-Version, nicht kompatibel mit Next.js)
+- **Repository:** `StFr84/F1_TSG_Kaiserslautern` – alte HTML-Version durch neue Next.js-App ersetzt
+
+### Ergebnisse
+- GitHub Actions Workflow eingerichtet: `.github/workflows/deploy.yml`
+- Jeder Push auf `main` → automatisches Vercel-Produktions-Deployment (~1 Minute)
+- Supabase-Umgebungsvariablen sicher als GitHub Secrets hinterlegt
+- GitHub Pages deaktiviert
+- Deployment-URL: `https://frontend-sage-six-92.vercel.app`
+
+### Wie das Deployment funktioniert
+1. Code-Änderung lokal entwickeln und testen
+2. `git push origin main` → GitHub Actions startet automatisch
+3. Vercel baut die App und deployed sie
+4. Änderung ist live
+
+### Offene Punkte
+- [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
+- [ ] Logo-Datei in App einbauen
 
 ---
