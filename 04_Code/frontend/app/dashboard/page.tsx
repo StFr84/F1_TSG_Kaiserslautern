@@ -26,19 +26,21 @@ export default async function DashboardPage() {
 
   const gameEvents = nextEvents?.filter(e => e.type === 'game') || []
   let pendingGames: typeof gameEvents = []
+  const pendingCountMap = new Map<string, number>()
   if (gameEvents.length > 0 && players?.length) {
     const { data: existingRsvps } = await supabase
       .from('rsvps').select('event_id, player_id')
       .in('event_id', gameEvents.map(e => e.id))
       .in('player_id', players.map(p => p.id))
     const rsvpSet = new Set((existingRsvps || []).map(r => `${r.event_id}:${r.player_id}`))
-    pendingGames = gameEvents.filter(event =>
-      players.some(player => !rsvpSet.has(`${event.id}:${player.id}`))
-    )
+    gameEvents.forEach(event => {
+      const count = players.filter(p => !rsvpSet.has(`${event.id}:${p.id}`)).length
+      if (count > 0) pendingCountMap.set(event.id, count)
+    })
+    pendingGames = gameEvents.filter(e => pendingCountMap.has(e.id))
   }
 
   const nextEvent = nextEvents?.[0]
-  const pendingGameIdSet = new Set(pendingGames.map(e => e.id))
 
   return (
     <div>
@@ -108,7 +110,7 @@ export default async function DashboardPage() {
             <ul className="space-y-1">
               {nextEvents.slice(1).map(event => {
                 const Icon = typeIcon[event.type as keyof typeof typeIcon] || Calendar
-                const isPending = pendingGameIdSet.has(event.id)
+                const pendingCount = pendingCountMap.get(event.id) ?? 0
                 return (
                   <li key={event.id}>
                     <Link href={`/termine/${event.id}`} className="flex items-center gap-3 py-2">
@@ -119,10 +121,12 @@ export default async function DashboardPage() {
                       </div>
                       <ChevronRight size={14} className="text-gray-400" />
                     </Link>
-                    {isPending && (
+                    {pendingCount > 0 && (
                       <div className="flex items-center gap-2 mb-1 ml-7 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
                         <AlertCircle size={13} className="text-amber-600 flex-shrink-0" />
-                        <p className="text-xs font-medium text-amber-800">Zusage ausstehend – Rückmeldung bis Donnerstag</p>
+                        <p className="text-xs font-medium text-amber-800">
+                          {pendingCount === 1 ? '1 Zusage ausstehend' : `${pendingCount} Zusagen ausstehend`} – Rückmeldung bis Donnerstag
+                        </p>
                       </div>
                     )}
                   </li>
