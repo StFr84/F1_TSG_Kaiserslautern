@@ -106,6 +106,11 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - Profil- und Events-Abfragen werden jetzt gleichzeitig (`Promise.all`) statt nacheinander gestartet
 - Geschätzte Einsparung: ~100–200ms pro Dashboard-Aufruf
 
+**Vercel Region**
+- Serverless Functions liefen in Washington D.C. (USA), Supabase in Frankfurt
+- `vercel.json` mit `"regions": ["fra1"]` hinzugefügt → beide jetzt in Frankfurt
+- Atlantiküberquerung (~100–150ms) pro Anfrage eliminiert
+
 ### Offene Punkte
 - [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
 
