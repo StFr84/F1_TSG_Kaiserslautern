@@ -115,3 +115,37 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
 
 ---
+
+## SESSION 6 – Nutzerverwaltung
+**Datum:** 08.06.2026
+**Teilnehmer:** Steven, Claude
+
+### Änderungen
+
+**Datenbankänderung**
+- Neues Feld `is_lead` (boolean) in `profiles`-Tabelle
+- Steven Fredrickson hat `is_lead = true` – einziger Nutzer der Trainer einladen und Rollen ändern darf
+
+**Einladungsformular (`/einladen`)**
+- Rollen-Dropdown (Elternteil / Trainer) nur für Lead-Trainer sichtbar
+- Server-seitige Validierung: nur `is_lead = true` darf Trainer-Rolle vergeben
+
+**Profil-Seite (`/profil`)**
+- Eigenes Profil kompakt oben als Visitenkarte (Avatar, Name, E-Mail, Rollen-Badge)
+- Nutzerliste darunter (nur für Trainer sichtbar)
+- Lead-Trainer kann Rollen ändern + Passwort-Reset-E-Mail senden
+
+### Berechtigungen
+
+| Aktion | Elternteil | Trainer | Lead-Trainer (Steven) |
+|--------|-----------|---------|----------------------|
+| Elternteil einladen | ✗ | ✓ | ✓ |
+| Trainer einladen | ✗ | ✗ | ✓ |
+| Nutzerliste sehen | ✗ | ✓ | ✓ |
+| Rolle ändern | ✗ | ✗ | ✓ |
+| Passwort-Reset senden | ✗ | ✗ | ✓ |
+
+### Offene Punkte
+- [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
+
+---
