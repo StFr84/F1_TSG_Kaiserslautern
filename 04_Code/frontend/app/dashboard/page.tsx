@@ -13,11 +13,11 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-
-  const { data: nextEvents } = await supabase
-    .from('events').select('*').eq('team_id', TEAM_ID)
-    .gte('starts_at', new Date().toISOString()).order('starts_at').limit(3)
+  const [{ data: profile }, { data: nextEvents }] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('events').select('*').eq('team_id', TEAM_ID)
+      .gte('starts_at', new Date().toISOString()).order('starts_at').limit(3),
+  ])
 
   const playerQuery = profile?.role === 'parent'
     ? supabase.from('players').select('*').eq('parent_id', user.id)
