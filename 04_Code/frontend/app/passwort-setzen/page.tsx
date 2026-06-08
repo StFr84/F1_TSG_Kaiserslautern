@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -9,7 +9,33 @@ export default function PasswortSetzenPage() {
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [ready, setReady] = useState(false)
+  const [expired, setExpired] = useState(false)
   const router = useRouter()
+  const supabase = createClient()
+  const expiredTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        if (expiredTimer.current) clearTimeout(expiredTimer.current)
+        setReady(true)
+      }
+    })
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setReady(true)
+      } else {
+        expiredTimer.current = setTimeout(() => setExpired(true), 2500)
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+      if (expiredTimer.current) clearTimeout(expiredTimer.current)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -23,7 +49,6 @@ export default function PasswortSetzenPage() {
       return
     }
     setLoading(true)
-    const supabase = createClient()
     const { error } = await supabase.auth.updateUser({ password })
     if (error) {
       setError(error.message)
@@ -31,6 +56,25 @@ export default function PasswortSetzenPage() {
       return
     }
     router.push('/')
+  }
+
+  if (!ready && !expired) {
+    return (
+      <div className="px-4 py-10 max-w-sm mx-auto text-center">
+        <p className="text-sm text-gray-400">Wird überprüft…</p>
+      </div>
+    )
+  }
+
+  if (expired) {
+    return (
+      <div className="px-4 py-10 max-w-sm mx-auto text-center">
+        <h1 className="text-lg font-bold text-gray-900 mb-3">Link abgelaufen</h1>
+        <p className="text-sm text-gray-500">
+          Dieser Einladungslink ist nicht mehr gültig. Bitte beim Trainer eine neue Einladung anfordern.
+        </p>
+      </div>
+    )
   }
 
   return (

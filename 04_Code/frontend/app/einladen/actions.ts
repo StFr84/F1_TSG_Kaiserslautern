@@ -27,7 +27,7 @@ export async function inviteParent(prevState: State, formData: FormData): Promis
   const admin = createAdminClient()
   const { error } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name, role },
-    redirectTo: `${siteUrl}/auth/callback`,
+    redirectTo: `${siteUrl}/passwort-setzen`,
   })
   if (error) return { error: error.message, success: false }
 
