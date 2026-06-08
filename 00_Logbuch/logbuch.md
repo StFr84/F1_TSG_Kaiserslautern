@@ -82,6 +82,31 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 
 ### Offene Punkte
 - [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
-- [ ] Logo-Datei in App einbauen
+- [x] Logo-Datei in App einbauen
+
+---
+
+## SESSION 5 – Performance-Verbesserungen
+**Datum:** 08.06.2026
+**Teilnehmer:** Steven, Claude
+
+### Änderungen
+
+**Logo-Darstellung (Dashboard)**
+- Weißer Rahmen um den Adler entfernt
+- Logo direkt auf TSG-Rot (`#9B1C2E`) – Adler zentriert via `objectFit: cover` + `objectPosition: left center`
+
+**Skeleton Loading States**
+- `app/dashboard/loading.tsx`: Roter Header + Termin-Card + Aktions-Kacheln + Weitere Termine als Platzhalter
+- `app/termine/loading.tsx`: 4 Termin-Karten als Platzhalter
+- `app/profil/loading.tsx`: Avatar-Kreis + Textzeilen als Platzhalter
+- Next.js zeigt diese automatisch beim Tab-Wechsel – „nichts passiert"-Gefühl beseitigt
+
+**Query-Optimierung (Dashboard)**
+- Profil- und Events-Abfragen werden jetzt gleichzeitig (`Promise.all`) statt nacheinander gestartet
+- Geschätzte Einsparung: ~100–200ms pro Dashboard-Aufruf
+
+### Offene Punkte
+- [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
 
 ---
