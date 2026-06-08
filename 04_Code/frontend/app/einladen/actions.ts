@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
 
 type State = { error: string; success: boolean }
 
@@ -26,4 +27,18 @@ export async function inviteParent(prevState: State, formData: FormData): Promis
   if (error) return { error: error.message, success: false }
 
   return { error: '', success: true }
+}
+
+export async function deleteInvite(userId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht eingeloggt')
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'trainer') throw new Error('Keine Berechtigung')
+
+  const admin = createAdminClient()
+  const { error } = await admin.auth.admin.deleteUser(userId)
+  if (error) throw new Error(error.message)
+  revalidatePath('/einladen')
 }
