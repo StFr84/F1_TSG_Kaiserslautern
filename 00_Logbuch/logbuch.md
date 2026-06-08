@@ -149,3 +149,36 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
 
 ---
+
+## SESSION 7 – Einladungsflow-Fix, Spielerkader & Bugfixes
+**Datum:** 08.06.2026
+**Teilnehmer:** Steven, Claude
+
+### Änderungen
+
+**Einladungsflow repariert**
+- Problem: Nutzer landeten nach Klick auf Einladungslink auf der Login-Seite statt auf „Passwort festlegen"
+- Ursache: Supabase nutzt den „Implicit Flow" – der Session-Token wird als URL-Hash (`#access_token=...`) übermittelt, den unser Server-Callback nicht lesen kann
+- Fix: Einladungslinks zeigen jetzt direkt auf `/passwort-setzen` (statt Umweg über `/auth/callback`)
+- Die Seite erkennt die Session automatisch via `onAuthStateChange` und zeigt sofort das Passwort-Formular
+- Bei abgelaufenem Link erscheint eine klare Fehlermeldung statt der Login-Seite
+
+**Dashboard-Spacing**
+- „Weitere Termine"-Überschrift hat jetzt mehr Abstand nach oben (`mt-6`)
+
+**Spielerkader angelegt (`players`-Tabelle)**
+- `birth_year`-Feld auf optional gesetzt (war Pflichtfeld, wird nicht benötigt)
+- 14 Spieler alphabetisch eingetragen (nur Vornamen):
+  Daniel, David, David, Eymen, Hannes, Hannes, Jannis, Jonah Amini, Levi, Lyam, Mads Ole, Matti, Nino, Paul
+- Nino = Spitzname von Nikolas Karl (Lui)
+
+**Trainer-Account Passwort-Reset**
+- Passwort für `steven.fredrickson@outlook.de` direkt per Admin-API zurückgesetzt
+- Ursache: Passwort wurde durch einen Test-Reset überschrieben
+
+### Offene Punkte
+- [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
+- [ ] Spieler mit Eltern-Accounts verknüpfen (`parent_id` in `players`-Tabelle)
+- [ ] Spielerkader in der App anzeigen
+
+---
