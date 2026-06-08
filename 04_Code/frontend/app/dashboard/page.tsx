@@ -105,7 +105,7 @@ export default async function DashboardPage() {
         )}
 
         {nextEvents && nextEvents.length > 1 && (
-          <div>
+          <div className="mt-6">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Weitere Termine</p>
             <ul className="space-y-1">
               {nextEvents.slice(1).map(event => {
