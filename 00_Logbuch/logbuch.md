@@ -179,6 +179,7 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 ### Offene Punkte
 - [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
 - [ ] Spieler mit Eltern-Accounts verknüpfen (`parent_id` in `players`-Tabelle)
-- [ ] Spielerkader in der App anzeigen
+- [ ] Spielerkader in der App anzeigen (nächster Schritt Session 8)
+- [ ] Profilfotos für Spieler (Supabase Storage, ~1,5 MB für 15 Fotos, zusammen mit Spieleransicht umsetzen)
 
 ---
