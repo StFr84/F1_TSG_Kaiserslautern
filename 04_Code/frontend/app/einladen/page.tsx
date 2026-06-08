@@ -10,7 +10,8 @@ export default async function EinladenPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase
+    .from('profiles').select('role, is_lead').eq('id', user.id).single()
   if (profile?.role !== 'trainer') redirect('/')
 
   const admin = createAdminClient()
@@ -19,9 +20,9 @@ export default async function EinladenPage() {
 
   return (
     <div className="px-4 py-6">
-      <h1 className="text-xl font-bold text-gray-900 mb-2">Elternteil einladen</h1>
-      <p className="text-sm text-gray-500 mb-6">Das Elternteil erhält eine E-Mail mit einem Einladungslink.</p>
-      <EinladenForm />
+      <h1 className="text-xl font-bold text-gray-900 mb-2">Nutzer einladen</h1>
+      <p className="text-sm text-gray-500 mb-6">Der Nutzer erhält eine E-Mail mit einem Einladungslink.</p>
+      <EinladenForm isLead={profile?.is_lead ?? false} />
 
       {pending.length > 0 && (
         <div className="mt-8">
