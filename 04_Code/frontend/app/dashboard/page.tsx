@@ -51,8 +51,8 @@ export default async function DashboardPage() {
             <h1 className="text-white text-xl font-bold">{profile?.full_name}</h1>
             <p className="text-white/60 text-xs mt-0.5">F1 · TSG 1861 Kaiserslautern</p>
           </div>
-          <div className="bg-white rounded-lg p-1.5">
-            <Image src="/logo.png" alt="TSG 1861 Kaiserslautern" width={72} height={36} />
+          <div className="overflow-hidden" style={{ position: 'relative', width: 48, height: 48 }}>
+            <Image src="/logo.png" alt="TSG 1861 Kaiserslautern" fill style={{ objectFit: 'cover', objectPosition: 'left center' }} />
           </div>
         </div>
       </div>
