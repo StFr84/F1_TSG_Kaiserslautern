@@ -57,28 +57,28 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 
 ---
 
-## SESSION 4 – Deployment & CI/CD
+## SESSION 4 – UI-Verbesserungen & Deployment
 **Datum:** 08.06.2026  
 **Teilnehmer:** Steven, Claude
 
-### Entscheidungen
+### UI-Änderungen (`app/dashboard/page.tsx`)
+- **Zusage-Warnung verschoben:** War als separater gelber Balken zwischen „Nächster Termin" und Trainer-Bereich. Steht jetzt direkt unter dem jeweiligen Turnier in der „Weitere Termine"-Liste
+- **Genaue Anzahl:** Statt generischem Text jetzt konkret: „1 Zusage ausstehend" bzw. „3 Zusagen ausstehend" (Einzahl/Mehrzahl korrekt)
+
+### Deployment & CI/CD
 - **Deployment-Plattform:** Vercel (war bereits gesetzt, jetzt sauber verbunden)
 - **CI/CD:** GitHub Actions – automatisches Deploy bei jedem Push auf `main`
 - **GitHub Pages:** deaktiviert (war für alte HTML-Version, nicht kompatibel mit Next.js)
 - **Repository:** `StFr84/F1_TSG_Kaiserslautern` – alte HTML-Version durch neue Next.js-App ersetzt
-
-### Ergebnisse
-- GitHub Actions Workflow eingerichtet: `.github/workflows/deploy.yml`
-- Jeder Push auf `main` → automatisches Vercel-Produktions-Deployment (~1 Minute)
-- Supabase-Umgebungsvariablen sicher als GitHub Secrets hinterlegt
-- GitHub Pages deaktiviert
-- Deployment-URL: `https://frontend-sage-six-92.vercel.app`
+- **Workflow:** `.github/workflows/deploy.yml`
+- **Supabase-Zugangsdaten** sicher als GitHub Secrets hinterlegt
+- **Deployment-URL:** `https://frontend-sage-six-92.vercel.app`
 
 ### Wie das Deployment funktioniert
 1. Code-Änderung lokal entwickeln und testen
 2. `git push origin main` → GitHub Actions startet automatisch
-3. Vercel baut die App und deployed sie
-4. Änderung ist live
+3. Vercel baut die App und deployed sie (~1 Minute)
+4. Änderung ist live – Handy einfach neu laden
 
 ### Offene Punkte
 - [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
