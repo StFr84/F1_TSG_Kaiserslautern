@@ -48,6 +48,7 @@ export default function PasswortSetzenPage() {
       await linkContactToUser(user.id, user.email)
     }
     router.push('/')
+    router.refresh()
   }
 
   if (!ready && !noSession) {
