@@ -53,7 +53,9 @@ export default function KaderListe({
   }
 
   function getPhotoUrl(player: Player): string | null {
-    return localPhotoUrls.get(player.id) ?? player.photo_url ?? null
+    const local = localPhotoUrls.get(player.id)
+    if (local !== undefined) return local || null  // '' = explizit kein Foto
+    return player.photo_url ?? null
   }
 
   function triggerUpload(playerId: string) {
@@ -65,11 +67,7 @@ export default function KaderListe({
     setUploadingPlayerId(playerId)
     try {
       await removePlayerPhoto(playerId)
-      setLocalPhotoUrls(prev => {
-        const next = new Map(prev)
-        next.delete(playerId)
-        return next
-      })
+      setLocalPhotoUrls(prev => new Map(prev).set(playerId, ''))
       router.refresh()
     } catch (err) {
       console.error('Foto-Löschen fehlgeschlagen:', err)
