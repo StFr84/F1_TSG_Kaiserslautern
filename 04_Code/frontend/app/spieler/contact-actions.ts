@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { validateContact } from './validate-contact'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${process.env.VERCEL_URL}` ?? 'http://localhost:3000'
 
 export async function inviteContact(playerId: string, formData: FormData) {
   const full_name = (formData.get('full_name') as string) ?? ''
