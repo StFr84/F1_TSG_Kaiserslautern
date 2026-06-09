@@ -44,14 +44,8 @@ export async function inviteContact(playerId: string, formData: FormData) {
     data: { full_name: full_name.trim(), role: 'parent' },
     redirectTo: `${SITE_URL}/auth/callback`,
   })
-  const isNonFatal =
-    !inviteError ||
-    inviteError.message.toLowerCase().includes('already') ||
-    inviteError.message.toLowerCase().includes('rate') ||
-    inviteError.message.includes('429')
-  if (!isNonFatal) {
-    throw new Error(inviteError!.message)
-  }
+  // All invite errors are non-fatal: the player_contacts entry is already in the DB.
+  // Email delivery failures (rate limit, SMTP config, already registered) can be retried.
 
   revalidatePath('/spieler')
 }
