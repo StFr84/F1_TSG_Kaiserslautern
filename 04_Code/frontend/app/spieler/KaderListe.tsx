@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, Phone, Plus, X } from 'lucide-react'
-import { addPlayer } from './actions'
+import { ChevronRight, Phone, Plus, Camera } from 'lucide-react'
+import { addPlayer, updatePlayerPhoto } from './actions'
 import { inviteContact } from './contact-actions'
+import { createClient } from '@/lib/supabase/client'
 
-type Player = { id: string; first_name: string }
+type Player = { id: string; first_name: string; photo_url: string | null }
 type Contact = {
   id: string
   player_id: string
@@ -39,12 +40,46 @@ export default function KaderListe({
   const [view, setView] = useState<View>({ type: 'list' })
   const [formError, setFormError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const [localPhotoUrls, setLocalPhotoUrls] = useState<Map<string, string>>(new Map())
+  const [uploadingPlayerId, setUploadingPlayerId] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const uploadTargetId = useRef<string | null>(null)
 
   const contactsByPlayer = new Map<string, Contact[]>()
   for (const c of contacts) {
     const arr = contactsByPlayer.get(c.player_id) ?? []
     arr.push(c)
     contactsByPlayer.set(c.player_id, arr)
+  }
+
+  function getPhotoUrl(player: Player): string | null {
+    return localPhotoUrls.get(player.id) ?? player.photo_url ?? null
+  }
+
+  function triggerUpload(playerId: string) {
+    uploadTargetId.current = playerId
+    fileInputRef.current?.click()
+  }
+
+  async function handlePhotoUpload(file: File, playerId: string) {
+    setUploadingPlayerId(playerId)
+    try {
+      const supabase = createClient()
+      const { error: uploadError } = await supabase.storage
+        .from('player-photos')
+        .upload(playerId, file, { upsert: true, contentType: file.type })
+      if (uploadError) throw uploadError
+      const { data: { publicUrl } } = supabase.storage
+        .from('player-photos')
+        .getPublicUrl(playerId)
+      await updatePlayerPhoto(playerId, publicUrl)
+      setLocalPhotoUrls(prev => new Map(prev).set(playerId, `${publicUrl}?t=${Date.now()}`))
+      router.refresh()
+    } catch (err) {
+      console.error('Foto-Upload fehlgeschlagen:', err)
+    } finally {
+      setUploadingPlayerId(null)
+    }
   }
 
   function handleAddPlayer(e: React.FormEvent<HTMLFormElement>) {
@@ -55,7 +90,7 @@ export default function KaderListe({
       try {
         const newPlayer = await addPlayer(formData)
         router.refresh()
-        setView({ type: 'player', player: newPlayer })
+        setView({ type: 'player', player: { ...newPlayer, photo_url: null } })
       } catch (err: unknown) {
         setFormError(err instanceof Error ? err.message : 'Fehler beim Anlegen')
       }
@@ -74,6 +109,62 @@ export default function KaderListe({
         setFormError(err instanceof Error ? err.message : 'Fehler beim Einladen')
       }
     })
+  }
+
+  // ─── AVATAR ──────────────────────────────────────────────────────────────
+
+  function ListAvatar({ player }: { player: Player }) {
+    const url = getPhotoUrl(player)
+    if (url) {
+      return (
+        <img
+          src={url}
+          alt={player.first_name}
+          className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+        />
+      )
+    }
+    return (
+      <div className="w-9 h-9 rounded-full bg-[#9B1C2E]/10 flex items-center justify-center flex-shrink-0">
+        <span className="text-sm font-bold text-[#9B1C2E]">{player.first_name[0]}</span>
+      </div>
+    )
+  }
+
+  function HeaderAvatar({ player }: { player: Player }) {
+    const url = getPhotoUrl(player)
+    const isUploading = uploadingPlayerId === player.id
+    return (
+      <button
+        type="button"
+        onClick={() => triggerUpload(player.id)}
+        className="relative flex-shrink-0"
+        aria-label="Foto hochladen"
+      >
+        {url ? (
+          <img
+            src={url}
+            alt={player.first_name}
+            className="w-11 h-11 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold text-white">
+            {isUploading ? (
+              <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              player.first_name[0]
+            )}
+          </div>
+        )}
+        <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm">
+          {isUploading ? (
+            <div className="w-3 h-3 border border-[#9B1C2E]/30 border-t-[#9B1C2E] rounded-full animate-spin" />
+          ) : (
+            <Camera size={10} color="#9B1C2E" strokeWidth={2.5} />
+          )}
+        </div>
+      </button>
+    )
   }
 
   // ─── HEADER ──────────────────────────────────────────────────────────────
@@ -132,9 +223,7 @@ export default function KaderListe({
                 <polyline points="15 18 9 12 15 6"/>
               </svg>
             </button>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-base font-bold text-white flex-shrink-0">
-              {view.player.first_name[0]}
-            </div>
+            <HeaderAvatar player={view.player} />
             <div>
               <p className="text-white/60 text-xs uppercase tracking-widest mb-0.5">Spieler</p>
               <h2 className="text-white text-lg font-bold">{view.player.first_name}</h2>
@@ -170,9 +259,7 @@ export default function KaderListe({
       return (
         <div className="bg-[#9B1C2E] px-4 pt-8 pb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-base font-bold text-white flex-shrink-0">
-              {view.player.first_name[0]}
-            </div>
+            <HeaderAvatar player={view.player} />
             <div>
               <p className="text-white/60 text-xs uppercase tracking-widest mb-0.5">Spieler</p>
               <h2 className="text-white text-lg font-bold">{view.player.first_name}</h2>
@@ -202,9 +289,7 @@ export default function KaderListe({
                 onClick={() => setView({ type: 'player', player })}
                 className="flex items-center gap-3 bg-white rounded-xl px-3.5 py-3 border border-gray-100 text-left w-full"
               >
-                <div className="w-9 h-9 rounded-full bg-[#9B1C2E]/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-bold text-[#9B1C2E]">{player.first_name[0]}</span>
-                </div>
+                <ListAvatar player={player} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">{player.first_name}</p>
                   <p className={`text-xs mt-0.5 ${pc.length > 0 ? 'text-[#9B1C2E] font-medium' : 'text-gray-400'}`}>
@@ -403,6 +488,20 @@ export default function KaderListe({
 
   return (
     <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={e => {
+          const file = e.target.files?.[0]
+          const playerId = uploadTargetId.current
+          if (file && playerId) {
+            handlePhotoUpload(file, playerId)
+          }
+          e.target.value = ''
+        }}
+      />
       {renderHeader()}
       {renderContent()}
     </>

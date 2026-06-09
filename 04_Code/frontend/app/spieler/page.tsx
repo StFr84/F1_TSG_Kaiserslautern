@@ -15,7 +15,7 @@ export default async function KaderPage() {
 
   const { data: players } = await supabase
     .from('players')
-    .select('id, first_name')
+    .select('id, first_name, photo_url')
     .eq('team_id', TEAM_ID)
     .order('first_name')
 
