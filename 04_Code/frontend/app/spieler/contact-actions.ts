@@ -26,18 +26,31 @@ export async function inviteContact(playerId: string, formData: FormData) {
 
   const admin = createAdminClient()
 
-  const { error: insertError } = await admin
+  const { data: existing } = await admin
     .from('player_contacts')
-    .insert({ player_id: playerId, full_name: full_name.trim(), role, email, phone, status: 'pending' })
-  if (insertError) throw new Error(insertError.message)
+    .select('id')
+    .eq('player_id', playerId)
+    .eq('email', email)
+    .maybeSingle()
+
+  if (!existing) {
+    const { error: insertError } = await admin
+      .from('player_contacts')
+      .insert({ player_id: playerId, full_name: full_name.trim(), role, email, phone, status: 'pending' })
+    if (insertError) throw new Error(insertError.message)
+  }
 
   const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name: full_name.trim(), role: 'parent' },
     redirectTo: `${SITE_URL}/auth/callback`,
   })
-  const isAlreadyRegistered = inviteError?.message.toLowerCase().includes('already')
-  if (inviteError && !isAlreadyRegistered) {
-    throw new Error(inviteError.message)
+  const isNonFatal =
+    !inviteError ||
+    inviteError.message.toLowerCase().includes('already') ||
+    inviteError.message.toLowerCase().includes('rate') ||
+    inviteError.message.includes('429')
+  if (!isNonFatal) {
+    throw new Error(inviteError!.message)
   }
 
   revalidatePath('/spieler')
