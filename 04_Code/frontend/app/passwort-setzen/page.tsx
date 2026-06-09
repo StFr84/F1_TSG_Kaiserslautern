@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { linkContactToUser } from './actions'
 
 export default function PasswortSetzenPage() {
   const [password, setPassword] = useState('')
@@ -54,6 +55,10 @@ export default function PasswortSetzenPage() {
       setError(error.message)
       setLoading(false)
       return
+    }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user?.email) {
+      await linkContactToUser(user.id, user.email)
     }
     router.push('/')
   }
