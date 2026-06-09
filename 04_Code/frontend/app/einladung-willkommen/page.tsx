@@ -6,7 +6,7 @@ import Link from 'next/link'
 export default async function EinladungWillkommenPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user || !user.email) redirect('/login')
 
   const admin = createAdminClient()
 
@@ -23,7 +23,7 @@ export default async function EinladungWillkommenPage() {
       .from('players')
       .select('first_name')
       .eq('id', contact.player_id)
-      .single()
+      .maybeSingle()
     playerName = player?.first_name ?? null
   }
 
@@ -42,7 +42,7 @@ export default async function EinladungWillkommenPage() {
           {playerName ? (
             <p className="text-sm text-gray-500 mt-2 text-center">
               Du wurdest als{' '}
-              <span className="font-medium text-gray-700">{contact?.role ?? 'Elternteil'}</span>{' '}
+              <span className="font-medium text-gray-700">{contact?.role || 'Elternteil'}</span>{' '}
               von{' '}
               <span className="font-medium text-gray-700">{playerName}</span>{' '}
               eingeladen.
