@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { linkContactToUser } from '@/app/passwort-setzen/actions'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -22,6 +23,10 @@ export default function LoginPage() {
       setError('E-Mail oder Passwort falsch.')
       setLoading(false)
       return
+    }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user?.email) {
+      await linkContactToUser(user.id, user.email)
     }
     router.push('/')
     router.refresh()
