@@ -31,14 +31,5 @@ export default async function KaderPage() {
     contacts = data ?? []
   }
 
-  return (
-    <div>
-      <div className="bg-[#9B1C2E] px-4 pt-8 pb-5">
-        <p className="text-white/65 text-xs mb-0.5">TSG 1861 Kaiserslautern</p>
-        <h1 className="text-white text-xl font-bold">Kader</h1>
-        <p className="text-white/60 text-xs mt-1">{players?.length ?? 0} Spieler</p>
-      </div>
-      <KaderListe players={players ?? []} contacts={contacts} />
-    </div>
-  )
+  return <KaderListe players={players ?? []} contacts={contacts} />
 }

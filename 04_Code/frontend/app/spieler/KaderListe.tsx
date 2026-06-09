@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { ChevronRight, Phone, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ChevronRight, Phone, X, Plus } from 'lucide-react'
 import { addPlayer } from './actions'
 import { inviteContact } from './contact-actions'
 
@@ -28,9 +29,12 @@ export default function KaderListe({
   players: Player[]
   contacts: Contact[]
 }) {
+  const router = useRouter()
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
-  const [sheetView, setSheetView] = useState<'list' | 'form' | 'success'>('list')
+  const [addingPlayer, setAddingPlayer] = useState(false)
+  const [sheetView, setSheetView] = useState<'contacts' | 'invite-form' | 'success'>('contacts')
   const [formError, setFormError] = useState('')
+  const [addError, setAddError] = useState('')
   const [isPending, startTransition] = useTransition()
 
   const contactsByPlayer = new Map<string, Contact[]>()
@@ -42,12 +46,37 @@ export default function KaderListe({
 
   function openSheet(player: Player) {
     setSelectedPlayer(player)
-    setSheetView('list')
+    setAddingPlayer(false)
+    setSheetView('contacts')
     setFormError('')
   }
 
   function closeSheet() {
     setSelectedPlayer(null)
+    setAddingPlayer(false)
+  }
+
+  function openAddPlayer() {
+    setAddingPlayer(true)
+    setSelectedPlayer(null)
+    setAddError('')
+  }
+
+  function handleAddPlayer(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    setAddError('')
+    startTransition(async () => {
+      try {
+        const newPlayer = await addPlayer(formData)
+        router.refresh()
+        setAddingPlayer(false)
+        setSelectedPlayer(newPlayer)
+        setSheetView('contacts')
+      } catch (err: unknown) {
+        setAddError(err instanceof Error ? err.message : 'Fehler beim Anlegen')
+      }
+    })
   }
 
   function handleInvite(e: React.FormEvent<HTMLFormElement>) {
@@ -69,25 +98,31 @@ export default function KaderListe({
     ? (contactsByPlayer.get(selectedPlayer.id) ?? [])
     : []
 
+  const sheetOpen = selectedPlayer !== null || addingPlayer
+
   return (
     <>
+      {/* Roter Header mit + Button */}
+      <div className="bg-[#9B1C2E] px-4 pt-8 pb-5 flex items-end justify-between">
+        <div>
+          <p className="text-white/65 text-xs mb-0.5">TSG 1861 Kaiserslautern</p>
+          <h1 className="text-white text-xl font-bold">Kader</h1>
+          <p className="text-white/60 text-xs mt-1">{players.length} Spieler</p>
+        </div>
+        <button
+          onClick={openAddPlayer}
+          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-1"
+        >
+          <Plus size={20} color="white" strokeWidth={2.5} />
+        </button>
+      </div>
+
       {/* Spielerliste */}
       <div className="px-3 pt-3 pb-20 flex flex-col gap-3">
-        <form action={addPlayer} className="flex gap-2 bg-white rounded-xl px-3 py-2.5 border border-gray-100">
-          <input
-            name="first_name"
-            placeholder="Vorname eingeben…"
-            required
-            className="flex-1 border-none outline-none text-sm text-gray-900 placeholder:text-gray-400"
-          />
-          <button type="submit"
-            className="bg-[#9B1C2E] text-white rounded-lg px-4 py-1.5 text-sm font-semibold">
-            +
-          </button>
-        </form>
-
         {players.length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-8">Noch keine Spieler eingetragen.</p>
+          <p className="text-sm text-gray-400 text-center py-8">
+            Noch keine Spieler — tippe auf das + oben rechts.
+          </p>
         )}
 
         {players.map(player => {
@@ -116,15 +151,62 @@ export default function KaderListe({
       </div>
 
       {/* Sheet Overlay */}
-      {selectedPlayer && (
+      {sheetOpen && (
         <>
+          <div className="fixed inset-0 bg-black/40 z-40" onClick={closeSheet} />
           <div
-            className="fixed inset-0 bg-black/40 z-40"
-            onClick={closeSheet}
-          />
-          <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#f5f5f7] rounded-t-2xl z-50 max-h-[85vh] overflow-y-auto">
+            className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#f5f5f7] rounded-t-2xl z-50 overflow-y-auto"
+            style={{ maxHeight: 'calc(100dvh - 5rem)' }}
+          >
 
-            {sheetView === 'list' && (
+            {/* NEUEN SPIELER ANLEGEN */}
+            {addingPlayer && (
+              <>
+                <div className="bg-[#9B1C2E] rounded-t-2xl px-4 pt-5 pb-4">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={closeSheet}
+                      className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0"
+                    >
+                      <X size={16} color="white" />
+                    </button>
+                    <div>
+                      <p className="text-white/60 text-xs uppercase tracking-widest mb-0.5">Kader</p>
+                      <h2 className="text-white text-lg font-bold">Neuer Spieler</h2>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleAddPlayer} className="p-3 flex flex-col gap-3 pb-20">
+                  <div className="bg-white rounded-xl px-4 py-3 border border-gray-100">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Vorname</p>
+                    <input
+                      name="first_name"
+                      type="text"
+                      placeholder="z.B. Leon"
+                      required
+                      autoFocus
+                      className="w-full border-none outline-none text-sm text-gray-900 placeholder:text-gray-400"
+                    />
+                  </div>
+
+                  {addError && (
+                    <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-3">{addError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="w-full py-3.5 bg-[#9B1C2E] text-white rounded-xl text-sm font-semibold disabled:opacity-50"
+                  >
+                    {isPending ? 'Wird angelegt…' : 'Spieler anlegen'}
+                  </button>
+                </form>
+              </>
+            )}
+
+            {/* SPIELER DETAIL — KONTAKTE */}
+            {selectedPlayer && sheetView === 'contacts' && (
               <>
                 <div className="bg-[#9B1C2E] rounded-t-2xl px-4 pt-5 pb-4">
                   <div className="flex items-center gap-3">
@@ -144,7 +226,7 @@ export default function KaderListe({
                   </div>
                 </div>
 
-                <div className="p-3 flex flex-col gap-2">
+                <div className="p-3 flex flex-col gap-2 pb-20">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1 pt-1 mb-1">
                     Kontakte
                   </p>
@@ -170,10 +252,8 @@ export default function KaderListe({
                           <p className="text-xs text-gray-500 mt-0.5">{c.role}</p>
                         </div>
                         {c.phone && (
-                          <a
-                            href={`tel:${c.phone}`}
-                            className="w-9 h-9 rounded-lg bg-[#9B1C2E]/10 flex items-center justify-center flex-shrink-0"
-                          >
+                          <a href={`tel:${c.phone}`}
+                            className="w-9 h-9 rounded-lg bg-[#9B1C2E]/10 flex items-center justify-center flex-shrink-0">
                             <Phone size={16} color="#9B1C2E" />
                           </a>
                         )}
@@ -195,7 +275,7 @@ export default function KaderListe({
                   ))}
 
                   <button
-                    onClick={() => setSheetView('form')}
+                    onClick={() => setSheetView('invite-form')}
                     className="w-full mt-1 py-3.5 bg-[#9B1C2E] text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -211,12 +291,13 @@ export default function KaderListe({
               </>
             )}
 
-            {sheetView === 'form' && (
+            {/* KONTAKT EINLADEN FORMULAR */}
+            {selectedPlayer && sheetView === 'invite-form' && (
               <>
                 <div className="bg-[#9B1C2E] rounded-t-2xl px-4 pt-5 pb-4">
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => setSheetView('list')}
+                      onClick={() => setSheetView('contacts')}
                       className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -231,16 +312,11 @@ export default function KaderListe({
                   </div>
                 </div>
 
-                <form onSubmit={handleInvite} className="p-3 flex flex-col gap-3">
+                <form onSubmit={handleInvite} className="p-3 flex flex-col gap-3 pb-20">
                   <div className="bg-white rounded-xl px-4 py-3 border border-gray-100">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Name</p>
-                    <input
-                      name="full_name"
-                      type="text"
-                      placeholder="z.B. Sandra Nono"
-                      required
-                      className="w-full border-none outline-none text-sm text-gray-900 placeholder:text-gray-400"
-                    />
+                    <input name="full_name" type="text" placeholder="z.B. Sandra Nono" required
+                      className="w-full border-none outline-none text-sm text-gray-900 placeholder:text-gray-400" />
                   </div>
 
                   <div className="bg-white rounded-xl px-4 py-3 border border-gray-100">
@@ -252,23 +328,14 @@ export default function KaderListe({
 
                   <div className="bg-white rounded-xl px-4 py-3 border border-gray-100">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">E-Mail</p>
-                    <input
-                      name="email"
-                      type="email"
-                      placeholder="z.B. sandra@mail.de"
-                      required
-                      className="w-full border-none outline-none text-sm text-gray-900 placeholder:text-gray-400"
-                    />
+                    <input name="email" type="email" placeholder="z.B. sandra@mail.de" required
+                      className="w-full border-none outline-none text-sm text-gray-900 placeholder:text-gray-400" />
                   </div>
 
                   <div className="bg-white rounded-xl px-4 py-3 border border-gray-100">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Telefon</p>
-                    <input
-                      name="phone"
-                      type="tel"
-                      placeholder="z.B. +49 151 12345678"
-                      className="w-full border-none outline-none text-sm text-gray-900 placeholder:text-gray-400"
-                    />
+                    <input name="phone" type="tel" placeholder="z.B. +49 151 12345678"
+                      className="w-full border-none outline-none text-sm text-gray-900 placeholder:text-gray-400" />
                   </div>
 
                   <div className="flex gap-2.5 items-start bg-blue-50 rounded-xl px-4 py-3 border border-blue-100">
@@ -288,19 +355,17 @@ export default function KaderListe({
                     <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-3">{formError}</p>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={isPending}
-                    className="w-full py-3.5 bg-[#9B1C2E] text-white rounded-xl text-sm font-semibold disabled:opacity-50"
-                  >
+                  <button type="submit" disabled={isPending}
+                    className="w-full py-3.5 bg-[#9B1C2E] text-white rounded-xl text-sm font-semibold disabled:opacity-50">
                     {isPending ? 'Wird gesendet…' : 'Einladung senden'}
                   </button>
                 </form>
               </>
             )}
 
-            {sheetView === 'success' && (
-              <div className="flex flex-col items-center justify-center px-6 py-12 gap-4">
+            {/* ERFOLG */}
+            {selectedPlayer && sheetView === 'success' && (
+              <div className="flex flex-col items-center justify-center px-6 py-12 gap-4 pb-20">
                 <div className="w-14 h-14 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center">
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
                     stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -313,10 +378,8 @@ export default function KaderListe({
                     Der Kontakt erhält eine E-Mail und wird dann mit {selectedPlayer.first_name} verknüpft.
                   </p>
                 </div>
-                <button
-                  onClick={() => setSheetView('list')}
-                  className="px-6 py-2.5 bg-[#9B1C2E] text-white rounded-xl text-sm font-semibold"
-                >
+                <button onClick={() => setSheetView('contacts')}
+                  className="px-6 py-2.5 bg-[#9B1C2E] text-white rounded-xl text-sm font-semibold">
                   Zurück zum Spieler
                 </button>
               </div>
