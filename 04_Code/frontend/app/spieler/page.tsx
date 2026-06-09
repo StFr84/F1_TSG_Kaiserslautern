@@ -1,54 +1,44 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { addPlayer } from './actions'
-import SpielerItem from './SpielerItem'
+import KaderListe from './KaderListe'
 
 const TEAM_ID = '00000000-0000-0000-0000-000000000001'
 
-export default async function SpielerPage() {
+export default async function KaderPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'trainer') redirect('/')
 
   const { data: players } = await supabase
-    .from('players').select('*').eq('team_id', TEAM_ID).order('first_name')
+    .from('players')
+    .select('id, first_name')
+    .eq('team_id', TEAM_ID)
+    .order('first_name')
 
-  const { data: parents } = await supabase
-    .from('profiles').select('id, full_name, role').order('full_name')
+  const playerIds = (players ?? []).map(p => p.id)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let contacts: any[] = []
+  if (playerIds.length) {
+    const { data } = await supabase
+      .from('player_contacts')
+      .select('*')
+      .in('player_id', playerIds)
+      .order('created_at')
+    contacts = data ?? []
+  }
 
   return (
-    <div className="px-4 py-6">
-      <div className="flex items-baseline justify-between mb-6">
-        <h1 className="text-xl font-bold text-gray-900">Spieler</h1>
-        {players?.length ? (
-          <span className="text-sm text-gray-400">{players.length} im Kader</span>
-        ) : null}
+    <div>
+      <div className="bg-[#9B1C2E] px-4 pt-8 pb-5">
+        <p className="text-white/65 text-xs mb-0.5">TSG 1861 Kaiserslautern</p>
+        <h1 className="text-white text-xl font-bold">Kader</h1>
+        <p className="text-white/60 text-xs mt-1">{players?.length ?? 0} Spieler</p>
       </div>
-
-      <form action={addPlayer} className="mb-6 flex gap-2">
-        <input name="first_name" placeholder="Vorname" required
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm" />
-        <button type="submit"
-          className="px-5 py-2.5 rounded-lg text-white text-sm font-medium bg-[#9B1C2E]">+</button>
-      </form>
-
-      <ul className="space-y-3">
-        {players?.map((player, index) => (
-          <SpielerItem
-            key={player.id}
-            player={player}
-            index={index + 1}
-            parents={parents ?? []}
-          />
-        ))}
-      </ul>
-
-      {!players?.length && (
-        <p className="text-sm text-gray-500 text-center py-8">Noch keine Spieler eingetragen.</p>
-      )}
+      <KaderListe players={players ?? []} contacts={contacts} />
     </div>
   )
 }
