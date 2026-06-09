@@ -33,7 +33,7 @@ export async function inviteContact(playerId: string, formData: FormData) {
 
   const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name: full_name.trim(), role: 'parent' },
-    redirectTo: `${SITE_URL}/passwort-setzen`,
+    redirectTo: `${SITE_URL}/auth/callback`,
   })
   if (inviteError && !inviteError.message.includes('already been registered')) {
     throw new Error(inviteError.message)
