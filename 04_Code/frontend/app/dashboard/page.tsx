@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Trophy, Dumbbell, Calendar, ChevronRight, AlertCircle, Users, UserPlus, Plus } from 'lucide-react'
+import { Trophy, Dumbbell, Calendar, ChevronRight, AlertCircle, Users, Plus } from 'lucide-react'
 import { formatEventDate, formatEventTime } from '@/lib/format'
 
 const TEAM_ID = '00000000-0000-0000-0000-000000000001'
@@ -81,24 +81,18 @@ export default async function DashboardPage() {
         {profile?.role === 'trainer' && (
           <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Trainer</p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Link href="/spieler" className="flex flex-col items-center gap-1.5 bg-white border border-gray-200 rounded-xl p-3">
                 <div className="w-9 h-9 rounded-full bg-[#9B1C2E]/10 flex items-center justify-center">
                   <Users size={18} color="#9B1C2E" />
                 </div>
-                <span className="text-xs font-medium text-gray-700 text-center">Spieler</span>
+                <span className="text-xs font-medium text-gray-700 text-center">Kader</span>
               </Link>
               <Link href="/termine/neu" className="flex flex-col items-center gap-1.5 bg-white border border-gray-200 rounded-xl p-3">
                 <div className="w-9 h-9 rounded-full bg-[#9B1C2E]/10 flex items-center justify-center">
                   <Plus size={18} color="#9B1C2E" />
                 </div>
                 <span className="text-xs font-medium text-gray-700 text-center">Neuer Termin</span>
-              </Link>
-              <Link href="/einladen" className="flex flex-col items-center gap-1.5 bg-white border border-gray-200 rounded-xl p-3">
-                <div className="w-9 h-9 rounded-full bg-[#9B1C2E]/10 flex items-center justify-center">
-                  <UserPlus size={18} color="#9B1C2E" />
-                </div>
-                <span className="text-xs font-medium text-gray-700 text-center">Einladen</span>
               </Link>
             </div>
           </div>
