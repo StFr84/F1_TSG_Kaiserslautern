@@ -1,32 +1,32 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
-import type { EmailOtpType } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
-  const code = searchParams.get('code')
-  const token_hash = searchParams.get('token_hash')
-  const type = searchParams.get('type') as EmailOtpType | null
-  const errorParam = searchParams.get('error')
+export async function GET(request: NextRequest) {
+  const requestUrl = new URL(request.url)
+  const code = requestUrl.searchParams.get('code')
 
-  if (errorParam) {
-    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
-  }
-
-  const supabase = await createClient()
-
-  if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({ token_hash, type })
+  if (code) {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return cookieStore.getAll() },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      const dest = type === 'invite' ? '/passwort-setzen' : '/'
-      return NextResponse.redirect(`${origin}${dest}`)
+      return NextResponse.redirect(new URL('/einladung-willkommen', requestUrl.origin))
     }
   }
 
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) return NextResponse.redirect(`${origin}/`)
-  }
-
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
+  return NextResponse.redirect(new URL('/login?error=link-abgelaufen', requestUrl.origin))
 }
