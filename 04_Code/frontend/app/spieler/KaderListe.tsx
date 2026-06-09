@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronRight, Phone, Plus, Camera } from 'lucide-react'
-import { addPlayer, updatePlayerPhoto } from './actions'
+import { addPlayer, updatePlayerPhoto, removePlayerPhoto } from './actions'
 import { inviteContact } from './contact-actions'
 import { createClient } from '@/lib/supabase/client'
 
@@ -59,6 +59,23 @@ export default function KaderListe({
   function triggerUpload(playerId: string) {
     uploadTargetId.current = playerId
     fileInputRef.current?.click()
+  }
+
+  async function handlePhotoRemove(playerId: string) {
+    setUploadingPlayerId(playerId)
+    try {
+      await removePlayerPhoto(playerId)
+      setLocalPhotoUrls(prev => {
+        const next = new Map(prev)
+        next.delete(playerId)
+        return next
+      })
+      router.refresh()
+    } catch (err) {
+      console.error('Foto-Löschen fehlgeschlagen:', err)
+    } finally {
+      setUploadingPlayerId(null)
+    }
   }
 
   async function handlePhotoUpload(file: File, playerId: string) {
@@ -400,6 +417,16 @@ export default function KaderListe({
             </svg>
             Kontakt einladen
           </button>
+
+          {getPhotoUrl(view.player) && (
+            <button
+              onClick={() => handlePhotoRemove(view.player.id)}
+              disabled={uploadingPlayerId === view.player.id}
+              className="w-full py-2.5 text-xs text-gray-400 disabled:opacity-50"
+            >
+              Foto entfernen
+            </button>
+          )}
         </div>
       )
     }

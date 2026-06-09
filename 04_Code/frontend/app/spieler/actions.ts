@@ -45,3 +45,15 @@ export async function updatePlayerPhoto(playerId: string, photoUrl: string) {
   if (error) throw new Error(error.message)
   revalidatePath('/spieler')
 }
+
+export async function removePlayerPhoto(playerId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Nicht eingeloggt')
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'trainer') throw new Error('Keine Berechtigung')
+  await supabase.storage.from('player-photos').remove([playerId])
+  const { error } = await supabase.from('players').update({ photo_url: null }).eq('id', playerId)
+  if (error) throw new Error(error.message)
+  revalidatePath('/spieler')
+}
