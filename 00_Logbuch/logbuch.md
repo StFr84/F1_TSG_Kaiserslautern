@@ -222,3 +222,33 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - [ ] Kontakt bearbeiten / löschen (noch nicht implementiert)
 
 ---
+
+## SESSION 9 – Profilfotos für Spieler
+**Datum:** 09.06.2026
+**Teilnehmer:** Steven, Claude
+
+### Änderungen
+
+**Profilfotos implementiert**
+- Neue Supabase Storage Bucket `player-photos` (öffentlich lesbar, nur Trainer dürfen hochladen)
+- Neues Feld `photo_url` (Text, optional) in der `players`-Tabelle
+- In der Spieler-Detailansicht hat der Avatar ein kleines Kamera-Symbol – antippen öffnet Fotobibliothek oder Kamera
+- Während des Uploads dreht sich ein Ladekreis im Avatar (optimistisches UI)
+- Das Foto erscheint sofort nach dem Upload ohne Neuladen
+- In der Kader-Liste wird das Foto ebenfalls als runder Avatar angezeigt
+- Kein Foto vorhanden → Initialen-Kreis als Fallback (unverändert)
+
+**Berechtigungen**
+- Öffentlich lesen: alle (auch ohne Login) → Fotos laden schnell, keine Authentifizierung nötig
+- Hochladen / Ersetzen / Löschen: nur Trainer (via Supabase Storage RLS)
+
+**Speicherplatz**
+- Supabase Free Tier: 1 GB Storage verfügbar
+- 14 Spielerfotos × ca. 3–5 MB = ~70 MB → deutlich unter dem Limit, kein Handlungsbedarf
+
+### Offene Punkte
+- [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
+- [ ] Kontakt bearbeiten / löschen (noch nicht implementiert)
+- [ ] Spieleransicht für Eltern (was sehen Eltern in der App für ihr Kind?)
+
+---
