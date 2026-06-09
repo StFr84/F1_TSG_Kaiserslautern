@@ -25,37 +25,21 @@ function CallbackHandler() {
       return
     }
 
-    // Implicit flow: Supabase sends #access_token=... in hash, client SDK picks it up
-    let handled = false
+    // Implicit flow: email invites send #access_token=... in the URL hash.
+    // @supabase/ssr defaults to PKCE and won't auto-process hash tokens,
+    // so we read them manually and call setSession directly.
+    const hashParams = new URLSearchParams(window.location.hash.slice(1))
+    const access_token = hashParams.get('access_token')
+    const refresh_token = hashParams.get('refresh_token')
 
-    const timer = setTimeout(() => {
-      if (!handled) router.replace('/login?error=link-abgelaufen')
-    }, 5000)
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (handled) return
-      if (event === 'SIGNED_IN' && session) {
-        handled = true
-        clearTimeout(timer)
-        subscription.unsubscribe()
-        router.replace('/einladung-willkommen')
-      }
-    })
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (handled) return
-      if (session) {
-        handled = true
-        clearTimeout(timer)
-        subscription.unsubscribe()
-        router.replace('/einladung-willkommen')
-      }
-    })
-
-    return () => {
-      clearTimeout(timer)
-      subscription.unsubscribe()
+    if (access_token && refresh_token) {
+      supabase.auth.setSession({ access_token, refresh_token }).then(({ data: { session }, error }) => {
+        router.replace(session && !error ? '/einladung-willkommen' : '/login?error=link-abgelaufen')
+      })
+      return
     }
+
+    router.replace('/login?error=link-abgelaufen')
   }, [router, searchParams])
 
   return (
