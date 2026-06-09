@@ -183,3 +183,42 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - [ ] Profilfotos für Spieler (Supabase Storage, ~1,5 MB für 15 Fotos, zusammen mit Spieleransicht umsetzen)
 
 ---
+
+## SESSION 8 – Kader-Redesign & Kontakte-Feature
+**Datum:** 09.06.2026
+**Teilnehmer:** Steven, Claude
+
+### Änderungen
+
+**Vercel-Token erneuert**
+- Deployment war wegen abgelaufenem Token fehlgeschlagen
+- Neuen Token auf vercel.com erstellt, via GitHub CLI als Secret gesetzt
+- Deployments funktionieren wieder automatisch bei Push auf `main`
+
+**Kader-Seite komplett neu gestaltet**
+- Roter Header (wie Dashboard) mit "Kader" + Spieleranzahl + weißem `+`-Button
+- Spielerliste als weiße Cards mit Initialen-Avatar (roter Kreis) und Kontakt-Status
+- `+`-Button oben rechts im Header öffnet "Neuer Spieler"-Formular (kein Inline-Input mehr)
+- Nach Anlegen eines Spielers direkt in die Spieler-Detailansicht → sofort Kontakt einladen möglich
+
+**Kontakte-Feature implementiert**
+- Neue Datenbanktabelle `player_contacts` (viele Kontakte pro Spieler)
+- Jeder Spieler hat eine Detailansicht mit Kontaktliste
+- Jeder Kontakt zeigt: Name, Beziehung (Mutter/Vater/etc.), Status-Badge (Aktiv / Einladung ausstehend), Anruf-Button (öffnet Telefon-App)
+- Trainer kann Kontakte direkt aus der Spieler-Detailansicht einladen: Name, Beziehung, E-Mail, Telefonnummer
+- Einladungsmail wird automatisch an die E-Mail-Adresse geschickt
+- Nach Passwort-Setzen wird der Kontakt automatisch mit dem Spieler verknüpft (Status → "Aktiv")
+
+**Navigation neu gestaltet**
+- Kein schwebendes Sheet mehr – stattdessen vollseitige View-Navigation
+- Zurück-Pfeil im Header navigiert zur vorherigen Ansicht
+- Formular ist sauber zwischen rotem Header und BottomNav eingespannt
+- "Einladen"-Kachel vom Dashboard entfernt (Einladung läuft jetzt über Kader-Seite)
+- "Spieler" → "Kader" auf dem Dashboard umbenannt
+
+### Offene Punkte
+- [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
+- [ ] Profilfotos für Spieler (Supabase Storage, zusammen mit Spieleransicht umsetzen)
+- [ ] Kontakt bearbeiten / löschen (noch nicht implementiert)
+
+---
