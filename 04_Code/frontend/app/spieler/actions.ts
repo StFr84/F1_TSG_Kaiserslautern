@@ -8,14 +8,20 @@ const TEAM_ID = '00000000-0000-0000-0000-000000000001'
 
 export async function addPlayer(formData: FormData) {
   const first_name = formData.get('first_name') as string
-  const birth_year = parseInt(formData.get('birth_year') as string)
-  if (!validatePlayer({ first_name, birth_year })) throw new Error('Ungültige Daten')
+  if (!validatePlayer({ first_name })) throw new Error('Ungültige Daten')
   const supabase = await createClient()
   const { error } = await supabase.from('players').insert({
     team_id: TEAM_ID,
     first_name: first_name.trim(),
-    birth_year,
   })
+  if (error) throw new Error(error.message)
+  revalidatePath('/spieler')
+}
+
+export async function renamePlayer(playerId: string, first_name: string) {
+  if (!first_name.trim()) return
+  const supabase = await createClient()
+  const { error } = await supabase.from('players').update({ first_name: first_name.trim() }).eq('id', playerId)
   if (error) throw new Error(error.message)
   revalidatePath('/spieler')
 }
