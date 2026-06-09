@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { linkContactToUser } from './actions'
@@ -11,31 +11,18 @@ export default function PasswortSetzenPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [ready, setReady] = useState(false)
-  const [expired, setExpired] = useState(false)
+  const [noSession, setNoSession] = useState(false)
   const router = useRouter()
   const supabase = createClient()
-  const expiredTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        if (expiredTimer.current) clearTimeout(expiredTimer.current)
-        setReady(true)
-      }
-    })
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setReady(true)
       } else {
-        expiredTimer.current = setTimeout(() => setExpired(true), 2500)
+        setNoSession(true)
       }
     })
-
-    return () => {
-      subscription.unsubscribe()
-      if (expiredTimer.current) clearTimeout(expiredTimer.current)
-    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(e: React.FormEvent) {
@@ -50,9 +37,9 @@ export default function PasswortSetzenPage() {
       return
     }
     setLoading(true)
-    const { error } = await supabase.auth.updateUser({ password })
-    if (error) {
-      setError(error.message)
+    const { error: updateError } = await supabase.auth.updateUser({ password })
+    if (updateError) {
+      setError(updateError.message)
       setLoading(false)
       return
     }
@@ -63,7 +50,7 @@ export default function PasswortSetzenPage() {
     router.push('/')
   }
 
-  if (!ready && !expired) {
+  if (!ready && !noSession) {
     return (
       <div className="px-4 py-10 max-w-sm mx-auto text-center">
         <p className="text-sm text-gray-400">Wird überprüft…</p>
@@ -71,7 +58,7 @@ export default function PasswortSetzenPage() {
     )
   }
 
-  if (expired) {
+  if (noSession) {
     return (
       <div className="px-4 py-10 max-w-sm mx-auto text-center">
         <h1 className="text-lg font-bold text-gray-900 mb-3">Link abgelaufen</h1>
