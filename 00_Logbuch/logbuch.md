@@ -246,9 +246,29 @@ Alle Entscheidungen, Änderungen und Ergebnisse werden hier chronologisch festge
 - Supabase Free Tier: 1 GB Storage verfügbar
 - 14 Spielerfotos × ca. 3–5 MB = ~70 MB → deutlich unter dem Limit, kein Handlungsbedarf
 
+### Bugfix: Foto entfernen
+- „Foto entfernen" zeigte das Foto weiter an, weil `view.player.photo_url` ein veralteter Snapshot war
+- Fix: leerer String `''` als Sentinel in `localPhotoUrls` → `getPhotoUrl` gibt `null` zurück, Avatar wechselt sofort auf Initialen
+
+### Backlog-Analyse & Priorisierung
+- Alle 7 ursprünglichen Funktionsbereiche aus Session 1 gegen aktuellen Stand abgeglichen
+- Empfohlene Reihenfolge für kommende Sessions:
+  1. App-Review aller Reiter (gemeinsam durchgehen)
+  2. Spieleransicht für Eltern (T4)
+  3. Anwesenheit Training (A1–A3)
+  4. Nachrichten / Ankündigungen (K1)
+  5. Trainingsplanung (D1–D3)
+  6. Kaderplanung, Fahrgemeinschaften
+
 ### Offene Punkte
-- [ ] Eigene Domain einrichten (statt `frontend-sage-six-92.vercel.app`)
-- [ ] Kontakt bearbeiten / löschen (noch nicht implementiert)
-- [ ] Spieleransicht für Eltern (was sehen Eltern in der App für ihr Kind?)
+- [ ] App-Review aller Reiter
+- [ ] Spieleransicht für Eltern (T4)
+- [ ] Anwesenheit Training (A1–A3)
+- [ ] Nachrichten / Ankündigungen (K1)
+- [ ] Trainingsplanung (D1–D3)
+- [ ] Kaderplanung (KP1–KP2)
+- [ ] Fahrgemeinschaften (F1–F2)
+- [ ] Kontakt bearbeiten / löschen
+- [ ] Eigene Domain einrichten (niedrige Priorität)
 
 ---
