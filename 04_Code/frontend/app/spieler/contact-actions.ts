@@ -35,7 +35,8 @@ export async function inviteContact(playerId: string, formData: FormData) {
     data: { full_name: full_name.trim(), role: 'parent' },
     redirectTo: `${SITE_URL}/auth/callback`,
   })
-  if (inviteError && !inviteError.message.includes('already been registered')) {
+  const isAlreadyRegistered = inviteError?.message.toLowerCase().includes('already')
+  if (inviteError && !isAlreadyRegistered) {
     throw new Error(inviteError.message)
   }
 
